@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+chan data_cleaning_model_channel,training_model_channel,random_forest;
+bool preprocessing_done = false;
+bool data_cleaning = false;
+bool random_forest_completed = false;
+bool R_Score_Acceptable = false;
+bool Ensembling_completed = false;
+bool test_completed = false;
+</declaration>
+	<template>
+		<name x="5" y="5">training_model</name>
+		<declaration>// Place local declarations here.
+bool train_test_data_split = false;
+</declaration>
+		<location id="id0" x="-1324" y="-510">
+			<name x="-1402" y="-493">Data_Source_Procurement</name>
+		</location>
+		<location id="id1" x="-1147" y="-510">
+			<name x="-1190" y="-501">Dataset_Creation</name>
+		</location>
+		<location id="id2" x="-901" y="-510">
+			<name x="-960" y="-493">Data_Preprocessing</name>
+		</location>
+		<location id="id3" x="-627" y="-510">
+			<name x="-731" y="-493">Feature_Engineering</name>
+		</location>
+		<location id="id4" x="-433" y="-510">
+			<name x="-484" y="-493">Model_Selection</name>
+		</location>
+		<location id="id5" x="-212" y="-510">
+			<name x="-255" y="-493">Model_Training</name>
+		</location>
+		<location id="id6" x="0" y="-510">
+			<name x="-34" y="-493">Test_Model</name>
+		</location>
+		<location id="id7" x="187" y="-510">
+			<name x="110" y="-493">R_Score_Calculation</name>
+		</location>
+		<location id="id8" x="484" y="-510">
+			<name x="459" y="-493">Training_Completed</name>
+		</location>
+		<location id="id9" x="-1504" y="-510">
+		</location>
+		<init ref="id9"/>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-179" y="-399">R_Score_Acceptable == false</label>
+			<label kind="assignment" x="-186" y="-433">Ensembling_completed = false, R_Score_Acceptable = true</label>
+			<nail x="178" y="-399"/>
+			<nail x="-221" y="-399"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-68" y="-654">test_completed == false</label>
+			<label kind="assignment" x="-68" y="-629">test_completed = true</label>
+			<nail x="-76" y="-603"/>
+			<nail x="17" y="-603"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-1487" y="-535">training_model_channel?</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="guard" x="255" y="-493">R_Score_Acceptable == true 
+ &amp;&amp; Ensembling_completed == true
+ &amp;&amp; test_completed == true</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="17" y="-510">test_completed == true</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-195" y="-510">Ensembling_completed == true</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-280" y="-663">Ensembling_completed == false</label>
+			<label kind="synchronisation" x="-272" y="-637">random_forest!</label>
+			<nail x="-272" y="-612"/>
+			<nail x="-187" y="-620"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-525" y="-663">train_test_data_split == false</label>
+			<label kind="assignment" x="-518" y="-646">train_test_data_split = true</label>
+			<nail x="-509" y="-621"/>
+			<nail x="-416" y="-629"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-399" y="-535">train_test_data_split == true</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-833" y="-535">preprocessing_done == true</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-1003" y="-637">data_cleaning == false</label>
+			<label kind="synchronisation" x="-1011" y="-663">data_cleaning_model_channel!</label>
+			<nail x="-978" y="-595"/>
+			<nail x="-893" y="-603"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+		</transition>
+	</template>
+	<template>
+		<name>Front_End</name>
+		<declaration>int current_over =  5;
+int current_ball = 3;
+int current_score = 120;
+bool batting_team_selected = false;
+bool bowling_team_Selecred = false;
+int runs_in_last_5 =40;
+int wickets_in_last_5 = 1;
+bool enetered_current_score= false;
+bool entered_current_over = false;
+bool entered_current_ball= false;
+bool selected_batting_team  = false;
+bool selected_bowling_team =false;
+bool entered_wickets_in_last_5 = false;
+bool entered_runs_Scored = false;
+bool entered_runs_in_last_5 = false;</declaration>
+		<location id="id10" x="-399" y="-8">
+		</location>
+		<location id="id11" x="340" y="0">
+			<name x="323" y="25">Submit</name>
+		</location>
+		<location id="id12" x="544" y="0">
+			<name x="534" y="-34">Predict_Score</name>
+		</location>
+		<location id="id13" x="-25" y="-382">
+			<name x="-35" y="-416">Over</name>
+		</location>
+		<location id="id14" x="-25" y="-263">
+			<name x="-35" y="-297">Ball_In_The_Over</name>
+		</location>
+		<location id="id15" x="-25" y="-144">
+			<name x="-35" y="-178">Batting_Team</name>
+		</location>
+		<location id="id16" x="-25" y="-34">
+			<name x="-68" y="-25">Bowling_Team</name>
+		</location>
+		<location id="id17" x="-25" y="127">
+			<name x="-35" y="93">Runs_In_Last_5_Overs</name>
+		</location>
+		<location id="id18" x="-34" y="272">
+			<name x="-44" y="238">Wickets_In_Last_5_Overs</name>
+		</location>
+		<location id="id19" x="-25" y="425">
+			<name x="-35" y="391">Current_Score</name>
+		</location>
+		<init ref="id10"/>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id18"/>
+			<label kind="guard" x="-84" y="289">wickets_in_last_5 &gt;10</label>
+			<nail x="-102" y="323"/>
+			<nail x="-35" y="323"/>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id19"/>
+			<label kind="guard" x="-50" y="471">current_score &lt; runs_in_last_5</label>
+			<nail x="-102" y="501"/>
+			<nail x="-8" y="510"/>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id17"/>
+			<label kind="guard" x="-75" y="71">runs_in_last_5 &gt; current_score</label>
+			<nail x="-93" y="84"/>
+			<nail x="-59" y="50"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id14"/>
+			<label kind="guard" x="-84" y="-309">current_ball &gt;6</label>
+			<nail x="-102" y="-288"/>
+			<nail x="-76" y="-314"/>
+		</transition>
+		<transition>
+			<source ref="id16"/>
+			<target ref="id16"/>
+			<label kind="guard" x="-195" y="-68">selected_bowling_team == false</label>
+			<label kind="assignment" x="-153" y="0">selected_bowling_team = true</label>
+			<nail x="-93" y="-60"/>
+			<nail x="-68" y="-85"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id15"/>
+			<label kind="guard" x="-144" y="-204">selected_batting_team == false</label>
+			<label kind="assignment" x="-161" y="-144">selected_batting_team=true</label>
+			<nail x="-110" y="-152"/>
+			<nail x="-102" y="-186"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-50" y="-480">current_over&gt;20</label>
+			<nail x="-68" y="-442"/>
+			<nail x="17" y="-450"/>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id11"/>
+			<label kind="guard" x="110" y="331">current_score &gt;= runs_in_last_5</label>
+			<nail x="153" y="306"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id19"/>
+			<nail x="-212" y="297"/>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id12"/>
+			<label kind="guard" x="382" y="0">current_ball &lt; 6 &amp;&amp; current_ball&gt;0
+&amp;&amp; current_over &lt;20 &amp;&amp; current_over&gt;0
+&amp;&amp; selected_batting_team ==true
+&amp;&amp; selected_bowling_team == true
+&amp;&amp; runs_in_last_5 &lt;= current_score
+&amp;&amp; wickets_in_last_5 &lt; 10
+&amp;&amp; current_score &gt;= runs_in_last_5</label>
+		</transition>
+		<transition>
+			<source ref="id16"/>
+			<target ref="id11"/>
+			<label kind="guard" x="17" y="-17">selected_bowling_team == true</label>
+			<nail x="153" y="-17"/>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-16" y="204">wickets_in_last_5 &lt; 10</label>
+			<nail x="153" y="204"/>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id11"/>
+			<label kind="guard" x="59" y="76">runs_in_last_5&lt;current_score</label>
+			<nail x="195" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id11"/>
+			<label kind="guard" x="17" y="-102">selected_batting_team ==true</label>
+			<nail x="127" y="-93"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id11"/>
+			<label kind="guard" x="51" y="-195">current_ball&lt;6 &amp;&amp; current_ball&gt;0</label>
+			<nail x="127" y="-161"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-7" y="-327">current_over &lt; 20 &amp;&amp; current_over &gt;0</label>
+			<nail x="195" y="-204"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id17"/>
+			<nail x="-212" y="85"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id14"/>
+			<nail x="-212" y="-153"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id13"/>
+			<nail x="-229" y="-238"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id18"/>
+			<nail x="-212" y="178"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id16"/>
+			<nail x="-204" y="-8"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id15"/>
+			<nail x="-212" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>UserInterface_Sample</name>
+		<declaration>int current_over = 5;
+int current_ball = 3;
+int current_score = 120;
+bool batting_team_selected = false;
+bool bowling_team_Selecred = false;
+int runs_in_last_5 =40;
+int wickets_in_last_5 = 1;
+bool enetered_current_score= false;
+bool entered_current_over = false;
+bool entered_current_ball= false;
+bool entered_batting_team  = false;
+bool entered_bowling_team =false;
+bool entered_wickets_in_last_5 = false;
+bool entered_runs_Scored = false;
+bool entered_runs_in_last_5 = false;
+</declaration>
+		<location id="id20" x="-518" y="-34">
+			<name x="-535" y="-8">Start</name>
+		</location>
+		<location id="id21" x="-391" y="-34">
+			<name x="-417" y="-17">Over</name>
+		</location>
+		<location id="id22" x="-136" y="-34">
+			<name x="-195" y="-25">Ball_In_The_Over</name>
+		</location>
+		<location id="id23" x="171" y="-34">
+			<name x="144" y="-17">Batting_Team</name>
+		</location>
+		<location id="id24" x="450" y="-34">
+			<name x="408" y="-8">Bowling_Team</name>
+		</location>
+		<location id="id25" x="790" y="-34">
+			<name x="680" y="-17">Wickets_In_Last_5_Overs</name>
+		</location>
+		<location id="id26" x="1054" y="-34">
+			<name x="1020" y="-17">Runs_Scored</name>
+		</location>
+		<location id="id27" x="1300" y="-34">
+			<name x="1275" y="-8">Runs_In_Last_5</name>
+		</location>
+		<location id="id28" x="1581" y="-34">
+			<name x="1564" y="-8">Submit</name>
+		</location>
+		<location id="id29" x="1819" y="-34">
+			<name x="1760" y="-17">Predict_Score</name>
+		</location>
+		<location id="id30" x="2099" y="-34">
+			<name x="2089" y="-68">Exit</name>
+		</location>
+		<init ref="id20"/>
+		<transition>
+			<source ref="id29"/>
+			<target ref="id30"/>
+			<label kind="guard" x="1870" y="-25">R_Score_Acceptable == true</label>
+		</transition>
+		<transition>
+			<source ref="id28"/>
+			<target ref="id29"/>
+			<label kind="synchronisation" x="1598" y="-34">training_model_channel!</label>
+		</transition>
+		<transition>
+			<source ref="id27"/>
+			<target ref="id27"/>
+			<label kind="guard" x="1232" y="-136">runs_in_last_5 &gt; current_score</label>
+			<nail x="1249" y="-110"/>
+			<nail x="1351" y="-110"/>
+		</transition>
+		<transition>
+			<source ref="id26"/>
+			<target ref="id26"/>
+			<label kind="guard" x="1012" y="-153">entered_runs_Scored == false</label>
+			<label kind="assignment" x="1012" y="-119">entered_runs_Scored = true</label>
+			<nail x="994" y="-119"/>
+			<nail x="1096" y="-119"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id25"/>
+			<label kind="guard" x="688" y="-144">wickets_in_last_5 &gt; 10</label>
+			<nail x="697" y="-119"/>
+			<nail x="816" y="-119"/>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id24"/>
+			<label kind="guard" x="365" y="-136">entered_bowling_team == false</label>
+			<label kind="assignment" x="374" y="-153">entered_bowling_team = true</label>
+			<nail x="374" y="-110"/>
+			<nail x="518" y="-110"/>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id25"/>
+			<label kind="guard" x="510" y="-25">entered_bowling_team == true</label>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id23"/>
+			<label kind="guard" x="76" y="-161">entered_batting_team==false</label>
+			<label kind="assignment" x="85" y="-136">entered_batting_team = true</label>
+			<nail x="102" y="-110"/>
+			<nail x="204" y="-110"/>
+		</transition>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id22"/>
+			<label kind="guard" x="-255" y="-144">(current_ball &gt; 6)</label>
+			<nail x="-204" y="-110"/>
+			<nail x="-102" y="-110"/>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id21"/>
+			<label kind="guard" x="-519" y="-153">(current_over &gt; 20)</label>
+			<nail x="-451" y="-119"/>
+			<nail x="-357" y="-119"/>
+		</transition>
+		<transition>
+			<source ref="id27"/>
+			<target ref="id28"/>
+			<label kind="guard" x="1351" y="-59">runs_in_last_5 &lt;=current_score</label>
+			<label kind="assignment" x="1360" y="-25">entered_runs_in_last_5 = true</label>
+		</transition>
+		<transition>
+			<source ref="id26"/>
+			<target ref="id27"/>
+			<label kind="guard" x="1071" y="-25">entered_runs_Scored == true</label>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
+			<label kind="guard" x="833" y="-59">wickets_in_last_5 &lt;= 10</label>
+			<label kind="assignment" x="808" y="-34">entered_wickets_in_last_5 = true</label>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id24"/>
+			<label kind="guard" x="212" y="-34">entered_batting_team == true</label>
+		</transition>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id23"/>
+			<label kind="guard" x="0" y="-59">current_ball&lt;7</label>
+			<label kind="assignment" x="-34" y="-25">entered_current_ball = true</label>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id22"/>
+			<label kind="guard" x="-382" y="-59">(current_over &lt; 21)</label>
+			<label kind="assignment" x="-398" y="-34">entered_current_over = true</label>
+		</transition>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id21"/>
+		</transition>
+	</template>
+	<template>
+		<name>data_cleaning_model</name>
+		<declaration>bool replace_na_null=false;
+bool drop_unwanted_columns = false;</declaration>
+		<location id="id31" x="-637" y="-42">
+		</location>
+		<location id="id32" x="-340" y="-42">
+			<name x="-408" y="-25">Drop_Unwanted_Columns</name>
+		</location>
+		<location id="id33" x="-93" y="-42">
+			<name x="-178" y="-25">Replace_Null_with_dot</name>
+		</location>
+		<location id="id34" x="221" y="-42">
+			<name x="179" y="-17">Data_Cleaned</name>
+		</location>
+		<init ref="id31"/>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-161" y="-178">replace_na_null==false</label>
+			<label kind="assignment" x="-161" y="-153">replace_na_null= true</label>
+			<nail x="-144" y="-119"/>
+			<nail x="-59" y="-119"/>
+		</transition>
+		<transition>
+			<source ref="id32"/>
+			<target ref="id32"/>
+			<label kind="guard" x="-442" y="-195">drop_unwanted_columns == false</label>
+			<label kind="assignment" x="-442" y="-161">drop_unwanted_columns = true</label>
+			<nail x="-399" y="-127"/>
+			<nail x="-323" y="-127"/>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id34"/>
+			<label kind="guard" x="-17" y="-68">replace_na_null == true</label>
+			<label kind="assignment" x="-17" y="-42">preprocessing_done = true</label>
+		</transition>
+		<transition>
+			<source ref="id32"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-322" y="-76">drop_unwanted_columns == true</label>
+		</transition>
+		<transition>
+			<source ref="id31"/>
+			<target ref="id32"/>
+			<label kind="synchronisation" x="-603" y="-68">data_cleaning_model_channel?</label>
+		</transition>
+	</template>
+	<template>
+		<name>random_forest_model</name>
+		<parameter>int trees_in_forest</parameter>
+		<declaration>int counter = 0;
+bool random_forest_completed = false;
+int value1= 30;
+int value2=15;
+int value3=5;
+int value;
+
+int majority(int value1, int value2, int value3)
+   {
+      if((value1 &gt; value2 )&amp;&amp;(value1 &gt; value3))
+      {
+           value=value1;
+        }
+      return value;
+}</declaration>
+		<location id="id35" x="-450" y="-59">
+		</location>
+		<location id="id36" x="-238" y="-59">
+			<name x="-255" y="-51">Random_Sample</name>
+		</location>
+		<location id="id37" x="-25" y="-59">
+			<name x="-93" y="-42">Generate_trees</name>
+		</location>
+		<location id="id38" x="323" y="-59">
+			<name x="280" y="-59">Ensemble</name>
+		</location>
+		<location id="id39" x="476" y="-59">
+			<name x="466" y="-93">Random_Forest_Completed</name>
+		</location>
+		<init ref="id35"/>
+		<transition>
+			<source ref="id38"/>
+			<target ref="id38"/>
+			<label kind="guard" x="221" y="-212">Ensembling_completed == false</label>
+			<label kind="assignment" x="212" y="-187">Ensembling_completed = true</label>
+			<nail x="246" y="-153"/>
+			<nail x="357" y="-153"/>
+		</transition>
+		<transition>
+			<source ref="id38"/>
+			<target ref="id39"/>
+			<label kind="assignment" x="323" y="-42">majority(value1,value2,value3)</label>
+		</transition>
+		<transition>
+			<source ref="id37"/>
+			<target ref="id37"/>
+			<label kind="guard" x="-135" y="-212">counter&lt; trees_in_forest</label>
+			<label kind="assignment" x="-118" y="-186">counter = counter +1</label>
+			<nail x="-118" y="-161"/>
+			<nail x="17" y="-161"/>
+			<nail x="-17" y="-76"/>
+		</transition>
+		<transition>
+			<source ref="id37"/>
+			<target ref="id38"/>
+			<label kind="guard" x="68" y="-85">counter&gt;= trees_in_forest</label>
+		</transition>
+		<transition>
+			<source ref="id36"/>
+			<target ref="id37"/>
+		</transition>
+		<transition>
+			<source ref="id35"/>
+			<target ref="id36"/>
+			<label kind="synchronisation" x="-399" y="-85">random_forest?</label>
+		</transition>
+	</template>
+	<template>
+		<name>UI</name>
+		<declaration>bool all_fields_entered =  false;</declaration>
+		<location id="id40" x="76" y="-8">
+			<name x="42" y="8">Predict_Score</name>
+		</location>
+		<location id="id41" x="314" y="-8">
+			<name x="306" y="8">Close</name>
+		</location>
+		<location id="id42" x="-212" y="-8">
+			<name x="-255" y="0">Enter_All_Fields</name>
+		</location>
+		<location id="id43" x="-416" y="-8">
+			<name x="-433" y="8">Start</name>
+		</location>
+		<init ref="id43"/>
+		<transition>
+			<source ref="id42"/>
+			<target ref="id42"/>
+			<label kind="guard" x="-289" y="-144">all_fields_entered == false</label>
+			<label kind="assignment" x="-272" y="-127">all_fields_entered=true</label>
+			<nail x="-263" y="-102"/>
+			<nail x="-178" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id41"/>
+		</transition>
+		<transition>
+			<source ref="id42"/>
+			<target ref="id40"/>
+			<label kind="guard" x="-143" y="-42">all_fields_entered == true</label>
+			<label kind="synchronisation" x="-127" y="-8">training_model_channel!</label>
+		</transition>
+		<transition>
+			<source ref="id43"/>
+			<target ref="id42"/>
+		</transition>
+	</template>
+	<system>
+  training=training_model();
+  cleaning= data_cleaning_model();
+  rf=random_forest_model(10);
+ ui= UserInterface_Sample();
+
+system ui,training,cleaning,rf;
+</system>
+	<queries>
+		<query>
+			<formula>E&lt;&gt; ui.Submit</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; training.Model_Selection
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; training.R_Score_Calculation
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; ui.Predict_Score
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; (ui.Submit imply ( ui.entered_runs_in_last_5 == true))
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (( rf.counter&lt;rf.trees_in_forest) &amp; (rf.random_forest_completed == false))|(rf.random_forest_completed imply(rf.counter &gt;=rf.trees_in_forest))
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (cleaning.Data_Cleaned imply (cleaning.drop_unwanted_columns &amp; cleaning.replace_na_null))
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (training.Exit imply (rf.random_forest_completed == true))
+
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (training.Feature_Engineering imply (preprocessing_done == true))
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (training.Model_Training imply (train_test_data_split == true))
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (training.Test_Model imply (training_completed == true))
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (deadlock imply ui.Exit)
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (rf.counter &lt;= rf.train_set_size)
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] not ((preprocessing_done == false) &amp; (training.Feature_Engineering))
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] not ((train_test_data_split == false) &amp; (training.Model_Training))
+</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] not((ui.entered_runs_in_last_5 == false) &amp; (ui.Submit))
+</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
